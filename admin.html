@@ -3,224 +3,489 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN PANEL - BIDAN LULU</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>Admin Panel - InfoBoard Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        :root { --primary: #00a8ff; --success: #2ed573; --danger: #ff4757; --dark: #0b0e11; --card: #1c1f23; --gold: #d4af37; }
-        * { box-sizing: border-box; outline: none; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--dark); color: #fff; padding: 0; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        
-        /* --- STYLING HALAMAN LOGIN PIN (MEWAH & CANTIK) --- */
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); border: 2px solid var(--gold); }
-        #login-screen.hidden { transform: translateY(-100%); }
-        
-        /* Bingkai Mewah Berkilau */
-        .login-box { background: rgba(28, 31, 35, 0.9); padding: 40px; border-radius: 30px; border: 2px solid var(--gold); box-shadow: 0 0 50px rgba(212, 175, 55, 0.3); text-align: center; max-width: 320px; position: relative; overflow: hidden; }
-        .login-box::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(212, 175, 55, 0.1), transparent); animation: shine 3s infinite; }
-        @keyframes shine { 0% { transform: translateX(-100%) translateY(-100%); } 100% { transform: translateX(100%) translateY(100%); } }
-
-        /* Gambar Logo Emas */
-        .gold-logo { width: 80px; height: 80px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; color: #000; font-weight: 800; box-shadow: 0 0 20px var(--gold); border: 4px solid #fff; }
-        
-        .login-title { font-weight: 800; text-transform: uppercase; color: #fff; letter-spacing: 2px; font-size: 16px; margin-bottom: 25px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        
-        /* Input PIN Mewah */
-        .pin-input-group { position: relative; margin-bottom: 20px; }
-        #pin-field { width: 100%; padding: 18px 20px; background: #000; border: 2px solid #444; border-radius: 15px; color: var(--gold); font-size: 24px; font-weight: 800; letter-spacing: 8px; text-align: center; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
-        #pin-field:focus { border-color: var(--gold); box-shadow: 0 0 15px rgba(212, 175, 55, 0.5), inset 0 2px 4px rgba(0,0,0,0.8); }
-        
-        .btn-login { width: 100%; padding: 18px; background: linear-gradient(45deg, var(--gold), #f9e498); border: none; border-radius: 15px; color: #000; font-weight: 800; text-transform: uppercase; font-size: 14px; cursor: pointer; transition: 0.3s; letter-spacing: 1px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .btn-login:active { transform: scale(0.97); box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-
-        /* Animasi Salah PIN */
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
-        .error-shake { animation: shake 0.5s; border-color: var(--danger) !important; box-shadow: 0 0 20px rgba(255, 71, 87, 0.5) !important; }
-
-        /* --- STYLING HALAMAN ADMIN (TETAP SAMA, TIDAK DIAK-ACAK) --- */
-        #admin-main-content { width: 100%; max-width: 400px; padding: 20px; display: none; overflow-y: auto; height: 100vh; }
-        h2.admin-title { color: var(--primary); text-align: center; font-weight: 800; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 2px; }
-        
-        .card { background: var(--card); padding: 20px; border-radius: 25px; margin-bottom: 15px; border: 1px solid #333; transition: 0.3s; }
-        .card:hover { border-color: #444; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        label { display: block; font-size: 10px; font-weight: 800; color: #888; margin-bottom: 10px; text-transform: uppercase; text-align: left; }
-        
-        /* 1. DAFTAR TUNGGU */
-        #list-antrean { margin-top: 5px; text-align: left; max-height: 180px; overflow-y: auto; padding-right: 5px; }
-        #list-antrean::-webkit-scrollbar { width: 5px; }
-        #list-antrean::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
-        .item-pasien { padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 8px; border-left: 4px solid var(--primary); font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-
-        /* 2. BUKA TUTUP */
-        select { width: 100%; padding: 16px; border-radius: 15px; background: #2c3139; color: #fff; border: 1px solid #444; font-weight: 700; outline: none; cursor: pointer; -webkit-appearance: none; }
-
-        /* 3. TOMBOL PANGGIL */
-        .btn-call { background: var(--success); color: #fff; height: 90px; font-size: 18px; box-shadow: 0 10px 20px rgba(46, 213, 115, 0.2); border: 2px solid #1ba95a; }
-
-        /* 4. KOTAK INFO */
-        textarea { 
-            width: 100%; padding: 15px; border-radius: 18px; background: #2c3139; color: #fff; 
-            border: 2px solid #444; font-weight: 700; font-family: inherit; font-size: 14px;
-            line-height: 1.5; min-height: 110px; outline: none; resize: none;
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-sidebar: #0f172a;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent-color: #2563eb;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
         }
-        textarea:focus { border-color: var(--primary); }
 
-        .btn { width: 100%; padding: 18px; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.2s; }
-        .btn:active { transform: scale(0.97); }
-        .btn-update { background: var(--primary); color: #fff; font-size: 13px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR ADMIN --- */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            color: #ffffff;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+            color: #3b82f6;
+        }
+
+        .brand span {
+            color: #ffffff;
+        }
+
+        .brand small {
+            font-size: 0.65rem;
+            background-color: #2563eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .menu-item.active a, .menu-item a:hover {
+            background-color: #1e293b;
+            color: #ffffff;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        /* --- PAGES SECTION --- */
+        .page-content {
+            display: none;
+        }
         
-        /* 5. RESET DATA */
-        .btn-reset { background: none; color: var(--danger); border: none; text-decoration: underline; font-size: 11px; width: 100%; margin-top: 20px; cursor: pointer; opacity: 0.5; font-weight: 700; display: block; text-align: center; }
-        .btn-reset:hover { opacity: 1; }
+        .page-content.active-page {
+            display: block;
+        }
+
+        /* --- CARDS METRICS --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background-color: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .metric-card h3 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            margin-right: 5px;
+        }
+
+        /* --- PANEL & GRID CONFIG --- */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .admin-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- FORM STYLES --- */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            background-color: #f8fafc;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+            background-color: #fff;
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background-color: var(--accent-color); color: #fff; }
+        .btn-danger { background-color: var(--danger-color); color: #fff; }
+        
+        .btn-action {
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        /* --- DATA TABLE --- */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .data-table th, .data-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .data-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            background-color: #f8fafc;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-high { background-color: #fee2e2; color: #ef4444; }
+        .badge-normal { background-color: #e0f2fe; color: #0ea5e9; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; padding: 1rem; }
+            .brand { margin-bottom: 1rem; }
+        }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div class="login-box">
-        <div class="gold-logo">L</div> <div class="login-title">Akses Admin Bidan Lulu</div>
-        
-        <div class="pin-input-group">
-            <input type="password" id="pin-field" maxlength="4" placeholder="••••" inputmode="numeric">
+    <div class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-sliders"></i>
+            <span>InfoBoard <small>ADMIN</small></span>
         </div>
-        
-        <button class="btn-login" onclick="cekPinHalamanDepan()">Buka Panel</button>
-    </div>
-</div>
-
-
-<div id="admin-main-content">
-    <h2 class="admin-title">ADMIN PANEL</h2>
-
-    <div class="card">
-        <label>DAFTAR ANTRIAN</label>
-        <div id="list-antrean">Memuat antrean...</div>
+        <ul class="menu-list">
+            <li class="menu-item active" id="nav-kelola-info"><a onclick="switchAdminPage('kelola-info')"><i class="fa-solid fa-pen-to-square"></i> Kelola Informasi</a></li>
+            <li class="menu-item" id="nav-kelola-agenda"><a onclick="switchAdminPage('kelola-agenda')"><i class="fa-solid fa-calendar-plus"></i> Kelola Agenda</a></li>
+            <li class="menu-item" id="nav-status-server"><a onclick="switchAdminPage('status-server')"><i class="fa-solid fa-server"></i> Status Server</a></li>
+        </ul>
     </div>
 
-    <div class="card">
-        <label>STATUS KLINIK</label>
-        <select id="status-set">
-            <option value="BUKA">🟢 KLINIK BUKA</option>
-            <option value="TUTUP">🔴 KLINIK TUTUP</option>
-        </select>
-        <button class="btn btn-update" onclick="setStatus()">SIMPAN STATUS</button>
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1 id="admin-page-title">Manajemen Informasi</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem;" id="admin-page-subtitle">Tambah, ubah, atau hapus pengumuman aktif pada layar utama.</p>
+            </div>
+        </div>
+
+        <div id="page-kelola-info" class="page-content active-page">
+            <div class="admin-grid">
+                <div class="panel">
+                    <h2><i class="fa-solid fa-plus" style="color: var(--accent-color);"></i> Buat Pengumuman</h2>
+                    <form id="form-info" onsubmit="handleFormSubmit(event, 'Pengumuman')">
+                        <div class="form-group">
+                            <label>Judul Pengumuman</label>
+                            <input type="text" class="form-control" placeholder="Contoh: Libur Nasional Keagamaan" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Kategori</label>
+                            <select class="form-control">
+                                <option>HRD</option>
+                                <option>IT Support</option>
+                                <option>Internal</option>
+                                <option>Umum</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tingkat Prioritas</label>
+                            <select class="form-control">
+                                <option>Normal</option>
+                                <option>Penting</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Publikasikan</button>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <h2><i class="fa-solid fa-list" style="color: var(--text-muted);"></i> Daftar Informasi Aktif</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Kategori</th>
+                                <th>Prioritas</th>
+                                <th style="text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Pembaruan Sistem Jam Kerja 2026</strong></td>
+                                <td>HRD</td>
+                                <td><span class="badge badge-high">Penting</span></td>
+                                <td style="text-align: center;">
+                                    <button class="btn btn-action btn-danger" onclick="deleteRow(this)"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Maintenance Server Antrean Utama</td>
+                                <td>IT Support</td>
+                                <td><span class="badge badge-normal">Normal</span></td>
+                                <td style="text-align: center;">
+                                    <button class="btn btn-action btn-danger" onclick="deleteRow(this)"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-kelola-agenda" class="page-content">
+            <div class="admin-grid">
+                <div class="panel">
+                    <h2><i class="fa-solid fa-calendar-plus" style="color: var(--success-color);"></i> Tambah Agenda Baru</h2>
+                    <form id="form-agenda" onsubmit="handleFormSubmit(event, 'Agenda')">
+                        <div class="form-group">
+                            <label>Nama Kegiatan</label>
+                            <input type="text" class="form-control" placeholder="Contoh: Rapat Koordinasi Kuartal" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal & Waktu</label>
+                            <input type="datetime-local" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Lokasi / Ruangan</label>
+                            <input type="text" class="form-control" placeholder="Contoh: Ruang Rapat Lt. 2 / Zoom" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="background-color: var(--success-color);"><i class="fa-solid fa-plus"></i> Jadwalkan</button>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <h2><i class="fa-solid fa-calendar-days" style="color: var(--text-muted);"></i> Jadwal Terdaftar</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Kegiatan</th>
+                                <th>Waktu</th>
+                                <th>Lokasi</th>
+                                <th style="text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Rapat Pleno Evaluasi Kuartal II</strong></td>
+                                <td>25 Juni 2026</td>
+                                <td>Ruang Utama</td>
+                                <td style="text-align: center;">
+                                    <button class="btn btn-action btn-danger" onclick="deleteRow(this)"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-status-server" class="page-content">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Status Sistem</h3>
+                    <div class="value" style="color: var(--success-color);"><span class="status-indicator"></span>Online</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Beban CPU</h3>
+                    <div class="value">14%</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Penggunaan RAM</h3>
+                    <div class="value">2.4 GB / 8 GB</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Database Uptime</h3>
+                    <div class="value">99.98%</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2><i class="fa-solid fa-terminal" style="color: #0f172a;"></i> Log Aktivitas Terakhir</h2>
+                <div style="background-color: #0f172a; color: #38bdf8; padding: 1.5rem; border-radius: 8px; font-family: monospace; font-size: 0.85rem; line-height: 1.6;">
+                    [2026-06-22 10:14:22] - Database connected successfully.<br>
+                    [2026-06-22 10:15:01] - Broadcast Service: Active clients connected: 3 Display Monitors.<br>
+                    [2026-06-22 11:00:12] - Admin 'Sistem' mempublikasikan Pengumuman Baru ID #025.<br>
+                    [2026-06-22 11:27:00] - Server health check: OK.
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="card">
-        <label>PANGGIL PASIEN</label>
-        <button class="btn btn-call" onclick="panggilPasienSaku()">PANGGIL BERIKUTNYA 🔊</button>
-    </div>
+    <script>
+        // Metadata judul halaman admin
+        const adminPageMetaData = {
+            'kelola-info': {
+                title: "Manajemen Informasi",
+                subtitle: "Tambah, ubah, atau hapus pengumuman aktif pada layar utama."
+            },
+            'kelola-agenda': {
+                title: "Manajemen Kalender & Agenda",
+                subtitle: "Atur jadwal pertemuan, acara, dan koordinasi internal."
+            },
+            'status-server': {
+                title: "Kesehatan & Performa Server",
+                subtitle: "Pantau penggunaan resource dan logs aktivitas real-time."
+            }
+        };
 
-    <div class="card">
-        <label>INFO KLINIK</label>
-        <textarea id="input-info" placeholder="Ketik info di sini..."></textarea>
-        <button class="btn btn-update" onclick="updateInfoHalamanDepan()">UPDATE INFO KE PASIEN</button>
-    </div>
+        // Fungsi navigasi halaman admin
+        function switchAdminPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active-page');
+            });
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
 
-    <button class="btn-reset" onclick="resetDataSaku()">RESET SEMUA DATA</button>
-</div>
+            document.getElementById(`page-${pageId}`).classList.add('active-page');
+            document.getElementById(`nav-${pageId}`).classList.add('active');
 
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, get, remove } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
-
-    const firebaseConfig = { 
-        apiKey: "AIzaSyCRGwnp5R1qLXGRW4B0LMB_ko5c8O2DNDU", 
-        authDomain: "klinik-ace97.firebaseapp.com", 
-        databaseURL: "https://klinik-ace97-default-rtdb.firebaseio.com", 
-        projectId: "klinik-ace97", 
-        storageBucket: "klinik-ace97.firebasestorage.app", 
-        messagingSenderId: "758250150131", 
-        appId: "1:758250150131:web:b00a0f4bd7e9dde4797f86" 
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    // --- LOGIKA LOGIN PIN MEWAH ---
-    const ADMIN_PIN_RAHASIA = "1234"; // Ganti '1234' dengan PIN kemauanmu
-
-    window.cekPinHalamanDepan = function() {
-        const pinField = document.getElementById('pin-field');
-        const inputPin = pinField.value;
-
-        if (inputPin === ADMIN_PIN_RAHASIA) {
-            // PIN Benar, hilangkan layar login, munculkan admin
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('admin-main-content').style.display = 'block';
-            pinField.value = ""; // Bersihkan
-        } else {
-            // PIN Salah, kasih animasi bergetar merah
-            pinField.classList.add('error-shake');
-            pinField.value = ""; 
-            setTimeout(() => pinField.classList.remove('error-shake'), 500);
+            document.getElementById('admin-page-title').innerText = adminPageMetaData[pageId].title;
+            document.getElementById('admin-page-subtitle').innerText = adminPageMetaData[pageId].subtitle;
         }
-    };
 
-    // Support klik 'Enter' di keyboard/hp untuk login
-    document.getElementById('pin-field').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') cekPinHalamanDepan();
-    });
-
-
-    // --- LOGIKA ADMIN UTAMA (FIX ERROR & STABIL) ---
-
-    // 1. Tampilkan Daftar (Realtime)
-    onValue(ref(db, 'queue'), (s) => {
-        const div = document.getElementById('list-antrean');
-        if(!s.exists()) { div.innerHTML = "<i>Antrean kosong...</i>"; return; }
-        div.innerHTML = "";
-        s.forEach(item => {
-            const p = item.val();
-            div.innerHTML += `<div class="item-pasien"><span><b>${p.nomor.toString().padStart(2, '0')}</b>. ${p.nama}</span></div>`;
-        });
-    });
-
-    // 2. Simpan Status
-    window.setStatus = function() {
-        const st = document.getElementById('status-set').value;
-        set(ref(db, 'config/status'), st).then(() => alert("Status Klinik Berhasil Diperbarui!"));
-    };
-
-    // 3. Panggil Pasien (Fix Error Baris 153)
-    window.panggilPasienSaku = function() {
-        get(ref(db, 'queue')).then(s => { 
-            if(s.exists()){ 
-                const data = s.val();
-                const keys = Object.keys(data);
-                const firstKey = keys[0]; // Ambil antrean paling atas
-                const nextPatientData = data[firstKey];
-
-                // Set ke 'active' untuk trigger suara di HP Pasien
-                set(ref(db, 'active'), {
-                    ...nextPatientData,
-                    time: Date.now() // Trigger suara unik
-                }).then(() => {
-                    // Hapus dari daftar tunggu sesudahnya
-                    remove(ref(db, 'queue/' + firstKey)); 
-                });
-            } else { alert("Daftar tunggu sudah habis."); }
-        });
-    };
-
-    // 4. Update Info
-    window.updateInfoHalamanDepan = function() {
-        const teks = document.getElementById('input-info').value;
-        set(ref(db, 'config/info'), teks).then(() => alert("Info Berhasil Di-update ke HP Pasien!"));
-    };
-
-    // 5. Reset Data
-    window.resetDataSaku = function() {
-        if(confirm("Yakin ingin menghapus semua data? Nomor antrean akan kembali ke awal.")) {
-            remove(ref(db)).then(() => location.reload());
+        // Fungsi tombol aksi Hapus data baris tabel
+        function deleteRow(button) {
+            if(confirm("Apakah Anda yakin ingin menghapus data ini dari Papan Informasi?")) {
+                const row = button.closest('tr');
+                row.remove();
+            }
         }
-    };
 
-    // Ambil data status awal untuk select option
-    get(ref(db, 'config/status')).then((s) => {
-        if(s.exists()) document.getElementById('status-set').value = s.val();
-    });
-</script>
-
+        // Fungsi aksi submit form simulasi
+        function handleFormSubmit(event, type) {
+            event.preventDefault();
+            alert(`${type} baru berhasil dibuat dan langsung disinkronkan ke Papan Informasi utama!`);
+            event.target.reset(); // Mengosongkan form kembali setelah diklik
+        }
+    </script>
 </body>
 </html>
