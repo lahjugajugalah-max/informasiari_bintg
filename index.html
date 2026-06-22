@@ -3,59 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maintenance</title>
+    <title>Papan Informasi Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        body {
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-sidebar: #0f172a;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent-color: #3b82f6;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #ff6b6b, #ffb3b3);
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
             display: flex;
-            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            color: #ffffff;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .brand {
+            display: flex;
             align-items: center;
-            height: 100vh;
-            color: #fff;
-            text-align: center;
+            gap: 10px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+            color: #3b82f6;
         }
 
-        .container {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
-        h1 {
-            font-size: 40px;
-            margin-bottom: 20px;
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
         }
 
-        p {
-            font-size: 20px;
-            margin-bottom: 10px;
+        .menu-item.active a, .menu-item a:hover {
+            background-color: #1e293b;
+            color: #ffffff;
         }
 
-        .highlight {
-            font-weight: bold;
-            color: #ffeaa7;
-            font-size: 22px;
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
         }
 
-        .loading {
-            margin-top: 20px;
-            font-size: 16px;
-            opacity: 0.8;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .date-badge {
+            background-color: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- CARDS GRID --- */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .card-info h3 {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-info p {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .icon-blue { background-color: #eff6ff; color: #3b82f6; }
+        .icon-green { background-color: #f0fdf4; color: #22c55e; }
+        .icon-yellow { background-color: #fefce8; color: #eab308; }
+
+        /* --- VISUALIZATION SECTION --- */
+        .dashboard-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- TABLE STYLE --- */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .info-table th, .info-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .info-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            background-color: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-high { background-color: #fee2e2; color: #ef4444; }
+        .status-normal { background-color: #e0f2fe; color: #0ea5e9; }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 992px) {
+            .dashboard-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; padding: 1rem; }
+            .brand { margin-bottom: 1rem; }
+            .menu-list { flex-direction: row; flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🚧 Website Sedang Maintenance</h1>
-    <p>Mohon maaf, website sedang dalam perbaikan.</p>
-    <p class="highlight">Segerakan datang ke Klinik Bidan Lulu yang bagus ❤️</p>
-    <div class="loading">Silakan kembali lagi nanti...</div>
-</div>
+    <div class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-chalkboard-user"></i>
+            <span>InfoBoard Pro</span>
+        </div>
+        <ul class="menu-list">
+            <li class="menu-item active"><a href="#"><i class="fa-solid fa-house"></i> Beranda</a></li>
+            <li class="menu-item"><a href="#"><i class="fa-solid fa-bullhorn"></i> Pengumuman</a></li>
+            <li class="menu-item"><a href="#"><i class="fa-solid fa-calendar-days"></i> Agenda</a></li>
+            <li class="menu-item"><a href="#"><i class="fa-solid fa-gear"></i> Pengaturan</a></li>
+        </ul>
+    </div>
 
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Papan Informasi Utama</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Selamat datang di pusat informasi digital internal.</p>
+            </div>
+            <div class="date-badge">
+                <i class="fa-regular fa-calendar"></i>
+                <span id="current-date">Senin, 22 Juni 2026</span>
+            </div>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-info">
+                    <h3>Total Pengumuman</h3>
+                    <p>24</p>
+                </div>
+                <div class="card-icon icon-blue">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-info">
+                    <h3>Agenda Bulan Ini</h3>
+                    <p>7 Aktif</p>
+                </div>
+                <div class="card-icon icon-green">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-info">
+                    <h3>Pengunjung Hari Ini</h3>
+                    <p>142</p>
+                </div>
+                <div class="card-icon icon-yellow">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="panel">
+                <h2><i class="fa-solid fa-list-check" style="color: var(--accent-color);"></i> Pengumuman Terbaru</h2>
+                <table class="info-table">
+                    <thead>
+                        <tr>
+                            <th>Judul Informasi</th>
+                            <th>Kategori</th>
+                            <th>Tanggal</th>
+                            <th>Prioritas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Pembaruan Sistem Jam Kerja 2026</strong></td>
+                            <td>HRD</td>
+                            <td>22 Juni 2026</td>
+                            <td><span class="status-badge status-high">Penting</span></td>
+                        </tr>
+                        <tr>
+                            <td>Maintenance Server Antrean Utama</td>
+                            <td>IT Support</td>
+                            <td>20 Juni 2026</td>
+                            <td><span class="status-badge status-normal">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td>Agenda Gathering Tahunan Perusahaan</td>
+                            <td>Internal</td>
+                            <td>18 Juni 2026</td>
+                            <td><span class="status-badge status-normal">Normal</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="panel">
+                <h2><i class="fa-solid fa-chart-pie" style="color: #22c55e;"></i> Tren Kunjungan</h2>
+                <div style="position: relative; height:200px; width:100%">
+                    <canvas id="analyticsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('analyticsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum'],
+                datasets: [{
+                    label: 'Pengunjung',
+                    data: [120, 190, 150, 180, 142],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { display: false },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
