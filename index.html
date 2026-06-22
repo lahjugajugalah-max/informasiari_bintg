@@ -52,6 +52,7 @@
             font-weight: 700;
             margin-bottom: 2.5rem;
             color: #3b82f6;
+            cursor: pointer;
         }
 
         .menu-list {
@@ -71,6 +72,7 @@
             border-radius: 8px;
             font-weight: 500;
             transition: all 0.2s;
+            cursor: pointer;
         }
 
         .menu-item.active a, .menu-item a:hover {
@@ -108,6 +110,15 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        /* --- PAGES SECTION --- */
+        .page-content {
+            display: none;
+        }
+        
+        .page-content.active-page {
+            display: block;
         }
 
         /* --- CARDS GRID --- */
@@ -168,6 +179,7 @@
             padding: 1.5rem;
             border-radius: 12px;
             border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
         }
 
         .panel h2 {
@@ -208,6 +220,33 @@
         .status-high { background-color: #fee2e2; color: #ef4444; }
         .status-normal { background-color: #e0f2fe; color: #0ea5e9; }
 
+        /* Form styling untuk halaman pengaturan */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 0.65rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
         /* Responsive Breakpoints */
         @media (max-width: 992px) {
             .dashboard-section {
@@ -226,23 +265,23 @@
 <body>
 
     <div class="sidebar">
-        <div class="brand">
+        <div class="brand" onclick="switchPage('beranda')">
             <i class="fa-solid fa-chalkboard-user"></i>
             <span>InfoBoard Pro</span>
         </div>
         <ul class="menu-list">
-            <li class="menu-item active"><a href="#"><i class="fa-solid fa-house"></i> Beranda</a></li>
-            <li class="menu-item"><a href="#"><i class="fa-solid fa-bullhorn"></i> Pengumuman</a></li>
-            <li class="menu-item"><a href="#"><i class="fa-solid fa-calendar-days"></i> Agenda</a></li>
-            <li class="menu-item"><a href="#"><i class="fa-solid fa-gear"></i> Pengaturan</a></li>
+            <li class="menu-item active" id="nav-beranda"><a onclick="switchPage('beranda')"><i class="fa-solid fa-house"></i> Beranda</a></li>
+            <li class="menu-item" id="nav-pengumuman"><a onclick="switchPage('pengumuman')"><i class="fa-solid fa-bullhorn"></i> Pengumuman</a></li>
+            <li class="menu-item" id="nav-agenda"><a onclick="switchPage('agenda')"><i class="fa-solid fa-calendar-days"></i> Agenda</a></li>
+            <li class="menu-item" id="nav-pengaturan"><a onclick="switchPage('pengaturan')"><i class="fa-solid fa-gear"></i> Pengaturan</a></li>
         </ul>
     </div>
 
     <div class="main-content">
         <div class="header">
             <div>
-                <h1>Papan Informasi Utama</h1>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Selamat datang di pusat informasi digital internal.</p>
+                <h1 id="page-title">Papan Informasi Utama</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem;" id="page-subtitle">Selamat datang di pusat informasi digital internal.</p>
             </div>
             <div class="date-badge">
                 <i class="fa-regular fa-calendar"></i>
@@ -250,81 +289,227 @@
             </div>
         </div>
 
-        <div class="cards-grid">
-            <div class="card">
-                <div class="card-info">
-                    <h3>Total Pengumuman</h3>
-                    <p>24</p>
+        <div id="page-beranda" class="page-content active-page">
+            <div class="cards-grid">
+                <div class="card" style="cursor: pointer;" onclick="switchPage('pengumuman')">
+                    <div class="card-info">
+                        <h3>Total Pengumuman</h3>
+                        <p>24</p>
+                    </div>
+                    <div class="card-icon icon-blue">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
                 </div>
-                <div class="card-icon icon-blue">
-                    <i class="fa-solid fa-bell"></i>
+                <div class="card" style="cursor: pointer;" onclick="switchPage('agenda')">
+                    <div class="card-info">
+                        <h3>Agenda Bulan Ini</h3>
+                        <p>7 Aktif</p>
+                    </div>
+                    <div class="card-icon icon-green">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-info">
+                        <h3>Pengunjung Hari Ini</h3>
+                        <p>142</p>
+                    </div>
+                    <div class="card-icon icon-yellow">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-info">
-                    <h3>Agenda Bulan Ini</h3>
-                    <p>7 Aktif</p>
+
+            <div class="dashboard-section">
+                <div class="panel">
+                    <h2><i class="fa-solid fa-list-check" style="color: var(--accent-color);"></i> Pengumuman Terbaru</h2>
+                    <table class="info-table">
+                        <thead>
+                            <tr>
+                                <th>Judul Informasi</th>
+                                <th>Kategori</th>
+                                <th>Tanggal</th>
+                                <th>Prioritas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Pembaruan Sistem Jam Kerja 2026</strong></td>
+                                <td>HRD</td>
+                                <td>22 Juni 2026</td>
+                                <td><span class="status-badge status-high">Penting</span></td>
+                            </tr>
+                            <tr>
+                                <td>Maintenance Server Antrean Utama</td>
+                                <td>IT Support</td>
+                                <td>20 Juni 2026</td>
+                                <td><span class="status-badge status-normal">Normal</span></td>
+                            </tr>
+                            <tr>
+                                <td>Agenda Gathering Tahunan Perusahaan</td>
+                                <td>Internal</td>
+                                <td>18 Juni 2026</td>
+                                <td><span class="status-badge status-normal">Normal</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="card-icon icon-green">
-                    <i class="fa-solid fa-calendar-check"></i>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-info">
-                    <h3>Pengunjung Hari Ini</h3>
-                    <p>142</p>
-                </div>
-                <div class="card-icon icon-yellow">
-                    <i class="fa-solid fa-users"></i>
+
+                <div class="panel">
+                    <h2><i class="fa-solid fa-chart-pie" style="color: #22c55e;"></i> Tren Kunjungan</h2>
+                    <div style="position: relative; height:200px; width:100%">
+                        <canvas id="analyticsChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="dashboard-section">
+        <div id="page-pengumuman" class="page-content">
             <div class="panel">
-                <h2><i class="fa-solid fa-list-check" style="color: var(--accent-color);"></i> Pengumuman Terbaru</h2>
+                <h2><i class="fa-solid fa-bullhorn" style="color: var(--accent-color);"></i> Semua Daftar Pengumuman</h2>
                 <table class="info-table">
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>Judul Informasi</th>
                             <th>Kategori</th>
-                            <th>Tanggal</th>
-                            <th>Prioritas</th>
+                            <th>Oleh</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
+                            <td>#024</td>
                             <td><strong>Pembaruan Sistem Jam Kerja 2026</strong></td>
                             <td>HRD</td>
-                            <td>22 Juni 2026</td>
+                            <td>Admin HR</td>
                             <td><span class="status-badge status-high">Penting</span></td>
                         </tr>
                         <tr>
+                            <td>#023</td>
                             <td>Maintenance Server Antrean Utama</td>
                             <td>IT Support</td>
-                            <td>20 Juni 2026</td>
+                            <td>SysAdmin</td>
                             <td><span class="status-badge status-normal">Normal</span></td>
                         </tr>
                         <tr>
+                            <td>#022</td>
                             <td>Agenda Gathering Tahunan Perusahaan</td>
                             <td>Internal</td>
-                            <td>18 Juni 2026</td>
+                            <td>PR Team</td>
+                            <td><span class="status-badge status-normal">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td>#021</td>
+                            <td>Pelatihan Keamanan Siber Terintegrasi</td>
+                            <td>IT Support</td>
+                            <td>SysAdmin</td>
                             <td><span class="status-badge status-normal">Normal</span></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+        </div>
 
+        <div id="page-agenda" class="page-content">
             <div class="panel">
-                <h2><i class="fa-solid fa-chart-pie" style="color: #22c55e;"></i> Tren Kunjungan</h2>
-                <div style="position: relative; height:200px; width:100%">
-                    <canvas id="analyticsChart"></canvas>
+                <h2><i class="fa-solid fa-calendar-days" style="color: #22c55e;"></i> Jadwal & Agenda Bulan Ini</h2>
+                <table class="info-table">
+                    <thead>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>Nama Kegiatan</th>
+                            <th>Lokasi / Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>25 Juni 2026 - 09:00</td>
+                            <td><strong>Rapat Pleno Evaluasi Kuartal II</strong></td>
+                            <td>Ruang Meeting Utama</td>
+                        </tr>
+                        <tr>
+                            <td>28 Juni 2026 - 13:30</td>
+                            <td>Sosialisasi SOP Klaim Kesehatan</td>
+                            <td>Zoom Meeting</td>
+                        </tr>
+                        <tr>
+                            <td>02 Juli 2026 - 10:00</td>
+                            <td>Audit Eksternal ISO 9001</td>
+                            <td>Kantor Pusat</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="page-pengaturan" class="page-content">
+            <div class="panel">
+                <h2><i class="fa-solid fa-gear" style="color: #eab308;"></i> Konfigurasi Papan Informasi</h2>
+                <div style="max-width: 500px;">
+                    <div class="form-group">
+                        <label>Nama Papan Informasi</label>
+                        <input type="text" class="form-control" value="InfoBoard Pro">
+                    </div>
+                    <div class="form-group">
+                        <label>Interval Refresh Data (Detik)</label>
+                        <input type="number" class="form-control" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label>Mode Tampilan</label>
+                        <select class="form-control">
+                            <option>Terang (Light Mode)</option>
+                            <option>Gelap (Dark Mode)</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="alert('Pengaturan berhasil disimpan!')">Simpan Perubahan</button>
                 </div>
             </div>
         </div>
+
     </div>
 
     <script>
+        // Data teks dinamis untuk Header saat halaman diubah
+        const pageMetaData = {
+            beranda: {
+                title: "Papan Informasi Utama",
+                subtitle: "Selamat datang di pusat informasi digital internal."
+            },
+            pengumuman: {
+                title: "Arsip Pengumuman",
+                subtitle: "Melihat informasi lengkap dan berita penting organisasi."
+            },
+            agenda: {
+                title: "Agenda & Kegiatan",
+                subtitle: "Kalender kegiatan mendatang agar tidak terlewatkan."
+            },
+            pengaturan: {
+                title: "Pengaturan Sistem",
+                subtitle: "Sesuaikan preferensi operasional papan informasi Anda."
+            }
+        };
+
+        // Fungsi utama untuk perpindahan halaman tanpa reload
+        function switchPage(pageId) {
+            // 1. Sembunyikan semua halaman & hapus class active pada menu
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active-page');
+            });
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // 2. Tampilkan halaman yang dipilih & aktifkan menunya
+            document.getElementById(`page-${pageId}`).classList.add('active-page');
+            document.getElementById(`nav-${pageId}`).classList.add('active');
+
+            // 3. Ubah teks Header secara dinamis
+            document.getElementById('page-title').innerText = pageMetaData[pageId].title;
+            document.getElementById('page-subtitle').innerText = pageMetaData[pageId].subtitle;
+        }
+
+        // AKTIVASI GRAFIK (Chart.js)
         const ctx = document.getElementById('analyticsChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
