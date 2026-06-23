@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STARRI GRUP</title>
+    <title>Rekapan Laporan Keuangan</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,12 +11,13 @@
     <style>
         :root {
             --bg-primary: #f8fafc;
-            --bg-sidebar: #0f172a;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --accent-color: #3b82f6;
             --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
             --border-color: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --primary: #0ea5e9;
         }
 
         * {
@@ -29,510 +30,288 @@
         body {
             background-color: var(--bg-primary);
             color: var(--text-main);
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 260px;
-            background-color: var(--bg-sidebar);
-            color: #ffffff;
-            padding: 2rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 2.5rem;
-            color: #3b82f6;
-            cursor: pointer;
-        }
-
-        .menu-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .menu-item a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: #94a3b8;
-            text-decoration: none;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .menu-item.active a, .menu-item a:hover {
-            background-color: #1e293b;
-            color: #ffffff;
-        }
-
-        /* --- MAIN CONTENT --- */
-        .main-content {
-            flex: 1;
             padding: 2rem;
-            overflow-y: auto;
         }
 
-        .header {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- HEADER --- */
+        .report-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
         }
 
-        .header h1 {
+        .report-header h1 {
             font-size: 1.75rem;
             font-weight: 700;
+            color: #0f172a;
         }
 
-        .date-badge {
-            background-color: var(--card-bg);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 500;
-            font-size: 0.875rem;
+        .report-header p {
             color: var(--text-muted);
-            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn-export {
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 0.65rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: background 0.2s;
         }
 
-        /* --- PAGES SECTION --- */
-        .page-content {
-            display: none;
-        }
-        
-        .page-content.active-page {
-            display: block;
+        .btn-export:hover {
+            background-color: #1e293b;
         }
 
-        /* --- CARDS GRID --- */
-        .cards-grid {
+        /* --- METRICS CARDS --- */
+        .finance-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
 
-        .card {
+        .f-card {
             background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
             border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        .card-info h3 {
-            font-size: 0.875rem;
+        .f-card-info p {
+            font-size: 0.85rem;
+            font-weight: 600;
             color: var(--text-muted);
-            margin-bottom: 0.5rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
         }
 
-        .card-info p {
+        .f-card-info h2 {
             font-size: 1.75rem;
             font-weight: 700;
         }
 
-        .card-icon {
+        .f-icon {
             width: 48px;
             height: 48px;
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.25rem;
         }
 
-        .icon-blue { background-color: #eff6ff; color: #3b82f6; }
-        .icon-green { background-color: #f0fdf4; color: #22c55e; }
-        .icon-yellow { background-color: #fefce8; color: #eab308; }
+        .bg-income { background-color: #ecfdf5; color: var(--success); }
+        .bg-expense { background-color: #fef2f2; color: var(--danger); }
+        .bg-profit { background-color: #f0f9ff; color: var(--primary); }
 
-        /* --- VISUALIZATION SECTION --- */
-        .dashboard-section {
+        /* --- VISUALIZATION & TABLE GRID --- */
+        .report-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1fr 2fr;
             gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .panel {
             background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
             border: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
+            border-radius: 14px;
+            padding: 1.5rem;
         }
 
-        .panel h2 {
+        .panel h3 {
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         /* --- TABLE STYLE --- */
-        .info-table {
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .finance-table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
         }
 
-        .info-table th, .info-table td {
-            padding: 0.75rem 1rem;
+        .finance-table th, .finance-table td {
+            padding: 1rem;
             border-bottom: 1px solid var(--border-color);
             font-size: 0.9rem;
         }
 
-        .info-table th {
+        .finance-table th {
+            background-color: #f8fafc;
             color: var(--text-muted);
             font-weight: 600;
-            background-color: #f8fafc;
         }
 
-        .status-badge {
+        .text-success { color: var(--success); font-weight: 600; }
+        .text-danger { color: var(--danger); font-weight: 600; }
+
+        .type-badge {
             padding: 0.25rem 0.5rem;
             border-radius: 6px;
             font-size: 0.75rem;
             font-weight: 600;
         }
-
-        .status-high { background-color: #fee2e2; color: #ef4444; }
-        .status-normal { background-color: #e0f2fe; color: #0ea5e9; }
-
-        /* Form styling untuk halaman pengaturan */
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-        .form-group label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-        .form-control {
-            width: 100%;
-            padding: 0.65rem 1rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-        .btn-primary {
-            background-color: var(--accent-color);
-            color: #fff;
-            padding: 0.65rem 1.25rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* Responsive Breakpoints */
-        @media (max-width: 992px) {
-            .dashboard-section {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; padding: 1rem; }
-            .brand { margin-bottom: 1rem; }
-            .menu-list { flex-direction: row; flex-wrap: wrap; }
-        }
+        .type-masuk { background-color: #d1fae5; color: #065f46; }
+        .type-keluar { background-color: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="brand" onclick="switchPage('beranda')">
-            <i class="fa-solid fa-chalkboard-user"></i>
-            <span>InfoBoard Pro</span>
-        </div>
-        <ul class="menu-list">
-            <li class="menu-item active" id="nav-beranda"><a onclick="switchPage('beranda')"><i class="fa-solid fa-house"></i> Beranda</a></li>
-            <li class="menu-item" id="nav-pengumuman"><a onclick="switchPage('pengumuman')"><i class="fa-solid fa-bullhorn"></i> Pengumuman</a></li>
-            <li class="menu-item" id="nav-agenda"><a onclick="switchPage('agenda')"><i class="fa-solid fa-calendar-days"></i> Agenda</a></li>
-            <li class="menu-item" id="nav-pengaturan"><a onclick="switchPage('pengaturan')"><i class="fa-solid fa-gear"></i> Pengaturan</a></li>
-        </ul>
-    </div>
-
-    <div class="main-content">
-        <div class="header">
+    <div class="container">
+        <div class="report-header">
             <div>
-                <h1 id="page-title">Papan Informasi Utama</h1>
-                <p style="color: var(--text-muted); font-size: 0.9rem;" id="page-subtitle">Selamat datang di pusat informasi digital internal.</p>
+                <h1>Rekapan Laporan Keuangan</h1>
+                <p>Periode Berjalan: Juni 2026</p>
             </div>
-            <div class="date-badge">
-                <i class="fa-regular fa-calendar"></i>
-                <span id="current-date">Senin, 22 Juni 2026</span>
+            <button class="btn-export" onclick="window.print()">
+                <i class="fa-solid fa-file-pdf"></i> Cetak / Simpan PDF
+            </button>
+        </div>
+
+        <div class="finance-cards">
+            <div class="f-card">
+                <div class="f-card-info">
+                    <p>Total Pemasukan</p>
+                    <h2>Rp 45.200.000</h2>
+                </div>
+                <div class="f-icon bg-income">
+                    <i class="fa-solid fa-arrow-down"></i>
+                </div>
+            </div>
+
+            <div class="f-card">
+                <div class="f-card-info">
+                    <p>Total Pengeluaran</p>
+                    <h2>Rp 18.450.000</h2>
+                </div>
+                <div class="f-icon bg-expense">
+                    <i class="fa-solid fa-arrow-up"></i>
+                </div>
+            </div>
+
+            <div class="f-card">
+                <div class="f-card-info">
+                    <p>Sisa Saldo (Net)</p>
+                    <h2>Rp 26.750.000</h2>
+                </div>
+                <div class="f-icon bg-profit">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
             </div>
         </div>
 
-        <div id="page-beranda" class="page-content active-page">
-            <div class="cards-grid">
-                <div class="card" style="cursor: pointer;" onclick="switchPage('pengumuman')">
-                    <div class="card-info">
-                        <h3>Total Pengumuman</h3>
-                        <p>24</p>
-                    </div>
-                    <div class="card-icon icon-blue">
-                        <i class="fa-solid fa-bell"></i>
-                    </div>
-                </div>
-                <div class="card" style="cursor: pointer;" onclick="switchPage('agenda')">
-                    <div class="card-info">
-                        <h3>Agenda Bulan Ini</h3>
-                        <p>7 Aktif</p>
-                    </div>
-                    <div class="card-icon icon-green">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-info">
-                        <h3>Pengunjung Hari Ini</h3>
-                        <p>142</p>
-                    </div>
-                    <div class="card-icon icon-yellow">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
+        <div class="report-grid">
+            <div class="panel">
+                <h3><i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> Struktur Kas</h3>
+                <div style="position: relative; height:260px; width:100%; display: flex; justify-content: center;">
+                    <canvas id="financePieChart"></canvas>
                 </div>
             </div>
 
-            <div class="dashboard-section">
-                <div class="panel">
-                    <h2><i class="fa-solid fa-list-check" style="color: var(--accent-color);"></i> Pengumuman Terbaru</h2>
-                    <table class="info-table">
+            <div class="panel">
+                <h3><i class="fa-solid fa-list-numeric" style="color: var(--text-muted);"></i> Rincian Transaksi Terbaru</h3>
+                <div class="table-responsive">
+                    <table class="finance-table">
                         <thead>
                             <tr>
-                                <th>Judul Informasi</th>
-                                <th>Kategori</th>
                                 <th>Tanggal</th>
-                                <th>Prioritas</th>
+                                <th>Keterangan</th>
+                                <th>Tipe</th>
+                                <th style="text-align: right;">Jumlah (Rupiah)</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><strong>Pembaruan Sistem Jam Kerja 2026</strong></td>
-                                <td>HRD</td>
-                                <td>22 Juni 2026</td>
-                                <td><span class="status-badge status-high">Penting</span></td>
+                                <td>12 Juni 2026</td>
+                                <td><strong>Pembayaran Invoice #9982</strong></td>
+                                <td><span class="type-badge type-masuk">Pemasukan</span></td>
+                                <td class="text-success" style="text-align: right;">+ Rp 15.000.000</td>
                             </tr>
                             <tr>
-                                <td>Maintenance Server Antrean Utama</td>
-                                <td>IT Support</td>
-                                <td>20 Juni 2026</td>
-                                <td><span class="status-badge status-normal">Normal</span></td>
+                                <td>14 Juni 2026</td>
+                                <td>Sewa Cloud Server & Domain Hosting</td>
+                                <td><span class="type-badge type-keluar">Pengeluaran</span></td>
+                                <td class="text-danger" style="text-align: right;">- Rp 2.450.000</td>
                             </tr>
                             <tr>
-                                <td>Agenda Gathering Tahunan Perusahaan</td>
-                                <td>Internal</td>
                                 <td>18 Juni 2026</td>
-                                <td><span class="status-badge status-normal">Normal</span></td>
+                                <td><strong>Penjualan Layanan Lisensi Pro</strong></td>
+                                <td><span class="type-badge type-masuk">Pemasukan</span></td>
+                                <td class="text-success" style="text-align: right;">+ Rp 30.200.000</td>
+                            </tr>
+                            <tr>
+                                <td>20 Juni 2026</td>
+                                <td>Biaya Operasional & Gaji Tim Magang</td>
+                                <td><span class="type-badge type-keluar">Pengeluaran</span></td>
+                                <td class="text-danger" style="text-align: right;">- Rp 16.000.000</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
-                <div class="panel">
-                    <h2><i class="fa-solid fa-chart-pie" style="color: #22c55e;"></i> Tren Kunjungan</h2>
-                    <div style="position: relative; height:200px; width:100%">
-                        <canvas id="analyticsChart"></canvas>
-                    </div>
-                </div>
             </div>
         </div>
-
-        <div id="page-pengumuman" class="page-content">
-            <div class="panel">
-                <h2><i class="fa-solid fa-bullhorn" style="color: var(--accent-color);"></i> Semua Daftar Pengumuman</h2>
-                <table class="info-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Judul Informasi</th>
-                            <th>Kategori</th>
-                            <th>Oleh</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>#024</td>
-                            <td><strong>Pembaruan Sistem Jam Kerja 2026</strong></td>
-                            <td>HRD</td>
-                            <td>Admin HR</td>
-                            <td><span class="status-badge status-high">Penting</span></td>
-                        </tr>
-                        <tr>
-                            <td>#023</td>
-                            <td>Maintenance Server Antrean Utama</td>
-                            <td>IT Support</td>
-                            <td>SysAdmin</td>
-                            <td><span class="status-badge status-normal">Normal</span></td>
-                        </tr>
-                        <tr>
-                            <td>#022</td>
-                            <td>Agenda Gathering Tahunan Perusahaan</td>
-                            <td>Internal</td>
-                            <td>PR Team</td>
-                            <td><span class="status-badge status-normal">Normal</span></td>
-                        </tr>
-                        <tr>
-                            <td>#021</td>
-                            <td>Pelatihan Keamanan Siber Terintegrasi</td>
-                            <td>IT Support</td>
-                            <td>SysAdmin</td>
-                            <td><span class="status-badge status-normal">Normal</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="page-agenda" class="page-content">
-            <div class="panel">
-                <h2><i class="fa-solid fa-calendar-days" style="color: #22c55e;"></i> Jadwal & Agenda Bulan Ini</h2>
-                <table class="info-table">
-                    <thead>
-                        <tr>
-                            <th>Waktu</th>
-                            <th>Nama Kegiatan</th>
-                            <th>Lokasi / Link</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>25 Juni 2026 - 09:00</td>
-                            <td><strong>Rapat Pleno Evaluasi Kuartal II</strong></td>
-                            <td>Ruang Meeting Utama</td>
-                        </tr>
-                        <tr>
-                            <td>28 Juni 2026 - 13:30</td>
-                            <td>Sosialisasi SOP Klaim Kesehatan</td>
-                            <td>Zoom Meeting</td>
-                        </tr>
-                        <tr>
-                            <td>02 Juli 2026 - 10:00</td>
-                            <td>Audit Eksternal ISO 9001</td>
-                            <td>Kantor Pusat</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="page-pengaturan" class="page-content">
-            <div class="panel">
-                <h2><i class="fa-solid fa-gear" style="color: #eab308;"></i> Konfigurasi Papan Informasi</h2>
-                <div style="max-width: 500px;">
-                    <div class="form-group">
-                        <label>Nama Papan Informasi</label>
-                        <input type="text" class="form-control" value="InfoBoard Pro">
-                    </div>
-                    <div class="form-group">
-                        <label>Interval Refresh Data (Detik)</label>
-                        <input type="number" class="form-control" value="30">
-                    </div>
-                    <div class="form-group">
-                        <label>Mode Tampilan</label>
-                        <select class="form-control">
-                            <option>Terang (Light Mode)</option>
-                            <option>Gelap (Dark Mode)</option>
-                        </select>
-                    </div>
-                    <button class="btn-primary" onclick="alert('Pengaturan berhasil disimpan!')">Simpan Perubahan</button>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // Data teks dinamis untuk Header saat halaman diubah
-        const pageMetaData = {
-            beranda: {
-                title: "Papan Informasi Utama",
-                subtitle: "Selamat datang di pusat informasi digital internal."
-            },
-            pengumuman: {
-                title: "Arsip Pengumuman",
-                subtitle: "Melihat informasi lengkap dan berita penting organisasi."
-            },
-            agenda: {
-                title: "Agenda & Kegiatan",
-                subtitle: "Kalender kegiatan mendatang agar tidak terlewatkan."
-            },
-            pengaturan: {
-                title: "Pengaturan Sistem",
-                subtitle: "Sesuaikan preferensi operasional papan informasi Anda."
-            }
-        };
-
-        // Fungsi utama untuk perpindahan halaman tanpa reload
-        function switchPage(pageId) {
-            // 1. Sembunyikan semua halaman & hapus class active pada menu
-            document.querySelectorAll('.page-content').forEach(page => {
-                page.classList.remove('active-page');
-            });
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            // 2. Tampilkan halaman yang dipilih & aktifkan menunya
-            document.getElementById(`page-${pageId}`).classList.add('active-page');
-            document.getElementById(`nav-${pageId}`).classList.add('active');
-
-            // 3. Ubah teks Header secara dinamis
-            document.getElementById('page-title').innerText = pageMetaData[pageId].title;
-            document.getElementById('page-subtitle').innerText = pageMetaData[pageId].subtitle;
-        }
-
-        // AKTIVASI GRAFIK (Chart.js)
-        const ctx = document.getElementById('analyticsChart').getContext('2d');
+        const ctx = document.getElementById('financePieChart').getContext('2d');
         new Chart(ctx, {
-            type: 'line',
+            type: 'doughnut',
             data: {
-                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum'],
+                labels: ['Sisa Saldo', 'Pengeluaran'],
                 datasets: [{
-                    label: 'Pengunjung',
-                    data: [120, 190, 150, 180, 142],
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    fill: true,
-                    tension: 0.4
+                    data: [26750000, 18450000],
+                    backgroundColor: ['#0ea5e9', '#ef4444'],
+                    borderWidth: 2,
+                    hoverOffset: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { display: false },
-                    x: { grid: { display: false } }
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: 'Inter', size: 12 },
+                            boxWidth: 12
+                        }
+                    }
                 }
             }
         });
