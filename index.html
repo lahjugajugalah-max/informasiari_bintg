@@ -3,317 +3,507 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekapan Laporan Keuangan</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Enterprise Financial Suite</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         :root {
-            --bg-primary: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --success: #10b981;
-            --danger: #ef4444;
-            --primary: #0ea5e9;
+            --bg-main: #060814;
+            --bg-card: #0b1120;
+            --bg-input: #151d30;
+            --border: #1f293d;
+            --mint: #10b981;
+            --crimson: #f43f5e;
+            --electric-blue: #3b82f6;
+            --text-p: #f8fafc;
+            --text-s: #64748b;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         body {
-            background-color: var(--bg-primary);
-            color: var(--text-main);
-            padding: 2rem;
+            background-color: var(--bg-main);
+            color: var(--text-p);
+            padding: 30px 20px;
+            min-height: 100vh;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .wrapper { max-width: 1400px; margin: 0 auto; }
+
+        /* --- FITUR PRIVASI KEAMANAN TINGKAT TINGGI (REGISTRASI & LOGIN) --- */
+        .user-gate {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(6, 8, 20, 0.98); backdrop-filter: blur(15px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; transition: all 0.4s ease;
         }
+        .gate-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            padding: 40px; border-radius: 24px; width: 100%; max-width: 450px; text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .gate-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        .gate-card p { color: var(--text-s); font-size: 13px; margin-bottom: 25px; }
+        .gate-toggle-link { color: var(--electric-blue); cursor: pointer; font-size: 13px; font-weight: 600; text-decoration: underline; }
 
         /* --- HEADER --- */
-        .report-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2.5rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
+        .dashboard-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 20px; margin-bottom: 30px; border-bottom: 1px solid var(--border);
         }
 
-        .report-header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #0f172a;
-        }
+        .title-block h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+        .title-block p { color: var(--text-s); font-size: 14px; margin-top: 4px; }
 
-        .report-header p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: 0.25rem;
+        .btn-action {
+            background: #fff; color: #000; padding: 12px 24px; border-radius: 10px;
+            font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(255,255,255,0.1);
         }
+        .btn-action:hover { background: #e2e8f0; transform: translateY(-2px); }
 
-        .btn-export {
-            background-color: #0f172a;
-            color: #ffffff;
-            padding: 0.65rem 1.25rem;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            font-size: 0.9rem;
+        .user-badge-profile {
+            background: var(--bg-input); border: 1px solid var(--border);
+            padding: 6px 14px; border-radius: 8px; font-size: 12px; color: var(--electric-blue);
+            font-weight: 700; display: inline-flex; align-items: center; gap: 6px; margin-top: 5px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
         }
 
-        .btn-export:hover {
-            background-color: #1e293b;
+        /* --- CARDS --- */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px; margin-bottom: 30px;
         }
 
-        /* --- METRICS CARDS --- */
-        .finance-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
+        .premium-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            padding: 25px; border-radius: 20px; position: relative;
+        }
+        .premium-card p { font-size: 13px; color: var(--text-s); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .premium-card .num { font-size: 32px; font-weight: 800; margin-top: 10px; }
+        .premium-card i { position: absolute; right: 25px; top: 25px; font-size: 24px; opacity: 0.2; }
+
+        /* --- CHARTS CONFIG --- */
+        .charts-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;
+        }
+        .chart-box {
+            background: var(--bg-card); border: 1px solid var(--border);
+            padding: 25px; border-radius: 20px; height: 340px;
+        }
+        .chart-box h3 { font-size: 15px; font-weight: 700; margin-bottom: 15px; color: var(--text-s); }
+        .chart-container { position: relative; height: 250px; width: 100%; }
+
+        /* --- MAIN INTERFACE --- */
+        .main-layout { display: grid; grid-template-columns: 400px 1fr; gap: 20px; }
+
+        .panel-form {
+            background: var(--bg-card); border: 1px solid var(--border);
+            padding: 25px; border-radius: 20px; height: fit-content;
+        }
+        .panel-form h3 { font-size: 16px; margin-bottom: 20px; font-weight: 700; }
+
+        .input-item { margin-bottom: 15px; }
+        .input-item label { display: block; font-size: 13px; color: var(--text-s); margin-bottom: 6px; font-weight: 600; }
+        .ctrl {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+            padding: 12px; border-radius: 10px; color: #fff; outline: none; font-size: 14px;
+        }
+        .ctrl:focus { border-color: var(--electric-blue); }
+
+        .btn-submit {
+            width: 100%; background: var(--electric-blue); color: #fff; padding: 14px;
+            border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 10px;
         }
 
-        .f-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* --- TABLE & FILTER --- */
+        .panel-table {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 20px; overflow: hidden; display: flex; flex-direction: column;
+        }
+        .filter-bar {
+            padding: 20px; border-bottom: 1px solid var(--border); display: flex; gap: 15px; background: rgba(255,255,255,0.01);
         }
 
-        .f-card-info p {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
-        }
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .data-table th { background: #111827; color: var(--text-s); font-size: 12px; font-weight: 700; padding: 16px; text-transform: uppercase; }
+        .data-table td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .data-table tr:hover { background: rgba(255,255,255,0.01); }
 
-        .f-card-info h2 {
-            font-size: 1.75rem;
-            font-weight: 700;
-        }
+        .badge { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .badge-in { background: rgba(16, 185, 129, 0.12); color: var(--mint); }
+        .badge-out { background: rgba(244, 63, 94, 0.12); color: var(--crimson); }
 
-        .f-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-
-        .bg-income { background-color: #ecfdf5; color: var(--success); }
-        .bg-expense { background-color: #fef2f2; color: var(--danger); }
-        .bg-profit { background-color: #f0f9ff; color: var(--primary); }
-
-        /* --- VISUALIZATION & TABLE GRID --- */
-        .report-grid {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 1.5rem;
-        }
+        .btn-trash { color: var(--text-s); border: none; background: none; cursor: pointer; font-size: 14px; }
+        .btn-trash:hover { color: var(--crimson); }
 
         @media (max-width: 1024px) {
-            .report-grid {
-                grid-template-columns: 1fr;
-            }
+            .charts-row, .main-layout { grid-template-columns: 1fr; }
         }
 
-        .panel {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 1.5rem;
-        }
-
-        .panel h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* --- TABLE STYLE --- */
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .finance-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        .finance-table th, .finance-table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-
-        .finance-table th {
-            background-color: #f8fafc;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .text-success { color: var(--success); font-weight: 600; }
-        .text-danger { color: var(--danger); font-weight: 600; }
-
-        .type-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .type-masuk { background-color: #d1fae5; color: #065f46; }
-        .type-keluar { background-color: #fee2e2; color: #991b1b; }
+        .pdf-mode { background: #060814 !important; padding: 30px !important; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="report-header">
-            <div>
-                <h1>Rekapan Laporan Keuangan</h1>
-                <p>Periode Berjalan: Juni 2026</p>
-            </div>
-            <button class="btn-export" onclick="window.print()">
-                <i class="fa-solid fa-file-pdf"></i> Cetak / Simpan PDF
-            </button>
-        </div>
-
-        <div class="finance-cards">
-            <div class="f-card">
-                <div class="f-card-info">
-                    <p>Total Pemasukan</p>
-                    <h2>Rp 45.200.000</h2>
+    <div class="user-gate" id="auth-gate">
+        <div class="gate-card" id="login-box">
+            <div style="font-size: 40px; margin-bottom: 15px; color: var(--electric-blue);"><i class="fa-solid fa-lock"></i></div>
+            <h2>Pintu Masuk Korporasi</h2>
+            <p>Silakan otentikasi akun Anda untuk membuka ruang kas terisolasi.</p>
+            <form id="login-form">
+                <div class="input-item" style="text-align: left;">
+                    <input type="text" id="login-user" class="ctrl" placeholder="Username" required>
                 </div>
-                <div class="f-icon bg-income">
-                    <i class="fa-solid fa-arrow-down"></i>
+                <div class="input-item" style="text-align: left;">
+                    <input type="password" id="login-pass" class="ctrl" placeholder="Password" required>
                 </div>
-            </div>
-
-            <div class="f-card">
-                <div class="f-card-info">
-                    <p>Total Pengeluaran</p>
-                    <h2>Rp 18.450.000</h2>
-                </div>
-                <div class="f-icon bg-expense">
-                    <i class="fa-solid fa-arrow-up"></i>
-                </div>
-            </div>
-
-            <div class="f-card">
-                <div class="f-card-info">
-                    <p>Sisa Saldo (Net)</p>
-                    <h2>Rp 26.750.000</h2>
-                </div>
-                <div class="f-icon bg-profit">
-                    <i class="fa-solid fa-wallet"></i>
-                </div>
+                <button type="submit" class="btn-submit">LOGIN SECARA AMAN</button>
+            </form>
+            <div style="margin-top: 20px;">
+                <p style="margin: 0;">Belum memiliki ruang kas? <span class="gate-toggle-link" onclick="toggleGatePanels(true)">Daftar Akun</span></p>
             </div>
         </div>
 
-        <div class="report-grid">
-            <div class="panel">
-                <h3><i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> Struktur Kas</h3>
-                <div style="position: relative; height:260px; width:100%; display: flex; justify-content: center;">
-                    <canvas id="financePieChart"></canvas>
+        <div class="gate-card" id="register-box" style="display: none;">
+            <div style="font-size: 40px; margin-bottom: 15px; color: var(--mint);"><i class="fa-solid fa-user-plus"></i></div>
+            <h2>Registrasi Akun Baru</h2>
+            <p>Buat ruang enklave baru. Data Anda dilindungi dari jangkauan pengguna lain.</p>
+            <form id="register-form">
+                <div class="input-item" style="text-align: left;">
+                    <input type="text" id="reg-user" class="ctrl" placeholder="Buat Username" required>
                 </div>
-            </div>
-
-            <div class="panel">
-                <h3><i class="fa-solid fa-list-numeric" style="color: var(--text-muted);"></i> Rincian Transaksi Terbaru</h3>
-                <div class="table-responsive">
-                    <table class="finance-table">
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Keterangan</th>
-                                <th>Tipe</th>
-                                <th style="text-align: right;">Jumlah (Rupiah)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>12 Juni 2026</td>
-                                <td><strong>Pembayaran Invoice #9982</strong></td>
-                                <td><span class="type-badge type-masuk">Pemasukan</span></td>
-                                <td class="text-success" style="text-align: right;">+ Rp 15.000.000</td>
-                            </tr>
-                            <tr>
-                                <td>14 Juni 2026</td>
-                                <td>Sewa Cloud Server & Domain Hosting</td>
-                                <td><span class="type-badge type-keluar">Pengeluaran</span></td>
-                                <td class="text-danger" style="text-align: right;">- Rp 2.450.000</td>
-                            </tr>
-                            <tr>
-                                <td>18 Juni 2026</td>
-                                <td><strong>Penjualan Layanan Lisensi Pro</strong></td>
-                                <td><span class="type-badge type-masuk">Pemasukan</span></td>
-                                <td class="text-success" style="text-align: right;">+ Rp 30.200.000</td>
-                            </tr>
-                            <tr>
-                                <td>20 Juni 2026</td>
-                                <td>Biaya Operasional & Gaji Tim Magang</td>
-                                <td><span class="type-badge type-keluar">Pengeluaran</span></td>
-                                <td class="text-danger" style="text-align: right;">- Rp 16.000.000</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="input-item" style="text-align: left;">
+                    <input type="password" id="reg-pass" class="ctrl" placeholder="Buat Password Keamanan" required>
                 </div>
+                <button type="submit" class="btn-submit" style="background: var(--mint);">DAFTARKAN RUANG</button>
+            </form>
+            <div style="margin-top: 20px;">
+                <p style="margin: 0;">Sudah punya akun? <span class="gate-toggle-link" onclick="toggleGatePanels(false)">Kembali Login</span></p>
             </div>
         </div>
     </div>
 
+    <div class="wrapper" id="dashboard-view">
+        <header class="dashboard-header">
+            <div class="title-block">
+                <h1>Corporate Ledger <span style="color: var(--electric-blue);">Intelligence</span></h1>
+                <div class="user-badge-profile" onclick="logoutUser()"><i class="fa-solid fa-user-check"></i> <span id="active-profile-name">Default</span> (Log Out)</div>
+            </div>
+            <button class="btn-action" id="cmd-pdf">
+                <i class="fa-solid fa-cloud-arrow-down"></i> EKSPOR LAPORAN (PDF)
+            </button>
+        </header>
+
+        <section class="stats-row">
+            <div class="premium-card">
+                <p>Arus Kas Masuk</p>
+                <div class="num" id="ui-in" style="color: var(--mint);">Rp 0</div>
+                <i class="fa-solid fa-vault"></i>
+            </div>
+            <div class="premium-card">
+                <p>Arus Kas Keluar</p>
+                <div class="num" id="ui-out" style="color: var(--crimson);">Rp 0</div>
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <div class="premium-card">
+                <p>Net Saldo Korporasi</p>
+                <div class="num" id="ui-net">Rp 0</div>
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+        </section>
+
+        <section class="charts-row">
+            <div class="chart-box">
+                <h3>Alokasi Pengeluaran & Pendapatan</h3>
+                <div class="chart-container">
+                    <canvas id="domPieChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h3>Analisis Distribusi Kategori</h3>
+                <div class="chart-container">
+                    <canvas id="domBarChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="main-layout">
+            <aside class="panel-form">
+                <h3><i class="fa-solid fa-feather" style="color: var(--electric-blue);"></i> Tambah Transaksi</h3>
+                <form id="ledger-form">
+                    <div class="input-item">
+                        <label>Deskripsi Acara/Item</label>
+                        <input type="text" id="form-desc" class="ctrl" placeholder="cth: Profit Saham" required>
+                    </div>
+                    <div class="input-item">
+                        <label>Jenis Aliran</label>
+                        <select id="form-type" class="ctrl">
+                            <option value="in">Pemasukan (Income)</option>
+                            <option value="out">Pengeluaran (Expense)</option>
+                        </select>
+                    </div>
+                    <div class="input-item">
+                        <label>Klaster Kategori</label>
+                        <select id="form-cat" class="ctrl">
+                            <option>Operasional</option>
+                            <option>Marketing</option>
+                            <option>Gaji Karyawan</option>
+                            <option>Investasi</option>
+                            <option>Lain-lain</option>
+                        </select>
+                    </div>
+                    <div class="input-item">
+                        <label>Nominal Pembayaran (Rp)</label>
+                        <input type="number" id="form-amt" class="ctrl" placeholder="0" required>
+                    </div>
+                    <button type="submit" class="btn-submit">SINKRONISASI DATA</button>
+                </form>
+            </aside>
+
+            <main class="panel-table">
+                <div class="filter-bar">
+                    <input type="text" id="search-box" class="ctrl" style="max-width: 250px;" placeholder="Cari deskripsi...">
+                    <select id="filter-type" class="ctrl" style="max-width: 180px;">
+                        <option value="all">Semua Tipe</option>
+                        <option value="in">Hanya Pemasukan</option>
+                        <option value="out">Hanya Pengeluaran</option>
+                    </select>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Item Keterangan</th>
+                                <th>Kategori</th>
+                                <th>Aliran</th>
+                                <th style="text-align: right;">Jumlah Neraca</th>
+                                <th style="text-align: center;">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledger-rows"></tbody>
+                    </table>
+                </div>
+            </main>
+        </section>
+    </div>
+
     <script>
-        const ctx = document.getElementById('financePieChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Sisa Saldo', 'Pengeluaran'],
-                datasets: [{
-                    data: [26750000, 18450000],
-                    backgroundColor: ['#0ea5e9', '#ef4444'],
-                    borderWidth: 2,
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            font: { family: 'Inter', size: 12 },
-                            boxWidth: 12
-                        }
-                    }
-                }
+        let currentSpaceKey = "";
+        let database = [];
+        let pieEngine = null, barEngine = null;
+
+        const formatCurrency = (val) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
+        };
+
+        // --- MANAJEMEN SISTEM AUTHENTIKASI & PRIVASI AKUN USER ---
+        const toggleGatePanels = (isRegister) => {
+            document.getElementById('login-box').style.display = isRegister ? 'none' : 'block';
+            document.getElementById('register-box').style.display = isRegister ? 'block' : 'none';
+        };
+
+        // Event: Registrasi Akun Baru
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('reg-user').value.trim().toLowerCase();
+            const password = document.getElementById('reg-pass').value;
+            
+            let userRegistry = JSON.parse(localStorage.getItem('sys_user_registry')) || {};
+            
+            if (userRegistry[username]) {
+                alert('Username ini sudah terdaftar oleh pengguna lain!');
+                return;
             }
+            
+            // Simpan data kredensial
+            userRegistry[username] = password;
+            localStorage.setItem('sys_user_registry', JSON.stringify(userRegistry));
+            
+            alert('Akun berhasil dibuat! Silakan masuk ke ruang Anda.');
+            e.target.reset();
+            toggleGatePanels(false);
+        });
+
+        // Event: Proses Verifikasi Login Masuk
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-user').value.trim().toLowerCase();
+            const password = document.getElementById('login-pass').value;
+            
+            let userRegistry = JSON.parse(localStorage.getItem('sys_user_registry')) || {};
+            
+            if (userRegistry[username] && userRegistry[username] === password) {
+                currentSpaceKey = "sec_ledger_space_" + username;
+                document.getElementById('active-profile-name').innerText = username.toUpperCase();
+                document.getElementById('auth-gate').style.display = 'none';
+                loadUserData();
+            } else {
+                alert('Otentikasi Gagal! Username atau password salah/tidak ditemukan.');
+            }
+        });
+
+        const logoutUser = () => {
+            currentSpaceKey = "";
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+            document.getElementById('auth-gate').style.display = 'flex';
+            toggleGatePanels(false);
+        };
+
+        const loadUserData = () => {
+            database = JSON.parse(localStorage.getItem(currentSpaceKey));
+            
+            // Template data awal yang langsung di-isolate per-user jika database miliknya masih kosong
+            if (!database) {
+                database = [
+                    { desc: 'Injeksi Dana Awal Akun', type: 'in', cat: 'Investasi', amount: 50000000 },
+                    { desc: 'Alokasi Pengeluaran Sistem', type: 'out', cat: 'Operasional', amount: 15000000 }
+                ];
+            }
+            syncWorkspace();
+        };
+
+        const syncWorkspace = () => {
+            const rowsContainer = document.getElementById('ledger-rows');
+            rowsContainer.innerHTML = '';
+
+            let totalIn = 0, totalOut = 0;
+            let query = document.getElementById('search-box').value.toLowerCase();
+            let filterType = document.getElementById('filter-type').value;
+
+            let categoryMap = { 'Operasional': 0, 'Marketing': 0, 'Gaji Karyawan': 0, 'Investasi': 0, 'Lain-lain': 0 };
+
+            database.forEach((item, index) => {
+                if (item.type === 'in') totalIn += item.amount;
+                else totalOut += item.amount;
+
+                categoryMap[item.cat] += item.amount;
+
+                if (query && !item.desc.toLowerCase().includes(query)) return;
+                if (filterType !== 'all' && item.type !== filterType) return;
+
+                const tr = `
+                    <tr>
+                        <td><strong>${item.desc}</strong></td>
+                        <td><span style="color:var(--text-s)">${item.cat}</span></td>
+                        <td><span class="badge ${item.type === 'in' ? 'badge-in' : 'badge-out'}">${item.type === 'in' ? 'INCOME' : 'EXPENSE'}</span></td>
+                        <td style="text-align: right; font-weight: 700; color: ${item.type === 'in' ? 'var(--mint)' : 'var(--crimson)'}">
+                            ${item.type === 'in' ? '+' : '-'} ${formatCurrency(item.amount)}
+                        </td>
+                        <td style="text-align: center;">
+                            <button class="btn-trash" onclick="burnData(${index})"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+                rowsContainer.insertAdjacentHTML('beforeend', tr);
+            });
+
+            document.getElementById('ui-in').innerText = formatCurrency(totalIn);
+            document.getElementById('ui-out').innerText = formatCurrency(totalOut);
+            const net = totalIn - totalOut;
+            document.getElementById('ui-net').innerText = formatCurrency(net);
+            document.getElementById('ui-net').style.color = net >= 0 ? 'var(--electric-blue)' : 'var(--crimson)';
+
+            renderCharts(totalIn, totalOut, categoryMap);
+            
+            if (currentSpaceKey) {
+                localStorage.setItem(currentSpaceKey, JSON.stringify(database));
+            }
+        };
+
+        const renderCharts = (inc, exp, catData) => {
+            if (pieEngine) pieEngine.destroy();
+            if (barEngine) barEngine.destroy();
+
+            const ctxPie = document.getElementById('domPieChart').getContext('2d');
+            pieEngine = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pemasukan', 'Pengeluaran'],
+                    datasets: [{
+                        data: [inc, exp],
+                        backgroundColor: ['#10b981', '#f43f5e'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: '#64748b', font: { size: 12 } } } }
+                }
+            });
+
+            const ctxBar = document.getElementById('domBarChart').getContext('2d');
+            barEngine = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(catData),
+                    datasets: [{
+                        data: Object.values(catData),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: '#1f293d' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        };
+
+        document.getElementById('ledger-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            database.unshift({
+                desc: document.getElementById('form-desc').value,
+                type: document.getElementById('form-type').value,
+                cat: document.getElementById('form-cat').value,
+                amount: parseInt(document.getElementById('form-amt').value)
+            });
+            e.target.reset();
+            syncWorkspace();
+        });
+
+        const burnData = (idx) => {
+            if (confirm('Hapus transaksi terpilih?')) {
+                database.splice(idx, 1);
+                syncWorkspace();
+            }
+        };
+
+        document.getElementById('search-box').addEventListener('input', syncWorkspace);
+        document.getElementById('filter-type').addEventListener('change', syncWorkspace);
+
+        // --- SOLUSI PATEN EKSPOR PDF SECARA ASINKRON (HTML2PDF) ---
+        document.getElementById('cmd-pdf').addEventListener('click', () => {
+            const targetElement = document.getElementById('dashboard-view');
+            targetElement.classList.add('pdf-mode');
+
+            const configuration = {
+                margin:       [10, 10, 10, 10],
+                filename:     'Executive_Financial_Report.pdf',
+                image:        { type: 'jpeg', quality: 1.0 },
+                html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#060814', delay: 500 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            const btn = document.getElementById('cmd-pdf');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+            html2pdf().set(configuration).from(targetElement).toPdf().get('pdf').then((pdf) => {
+                targetElement.classList.remove('pdf-mode');
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> EKSPOR LAPORAN (PDF)';
+            }).save();
         });
     </script>
 </body>
