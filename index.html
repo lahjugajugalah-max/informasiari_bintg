@@ -58,7 +58,12 @@
         }
 
         .title-block h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-        .title-block p { color: var(--text-s); font-size: 14px; margin-top: 4px; }
+        
+        /* Tambahan Style untuk Jam & Hari Realtime */
+        .live-clock-wrapper {
+            font-size: 13px; color: var(--text-s); margin-top: 6px; display: flex; align-items: center; gap: 8px;
+        }
+        .live-clock-wrapper i { color: var(--electric-blue); }
 
         .btn-action {
             background: #fff; color: #000; padding: 12px 24px; border-radius: 10px;
@@ -139,6 +144,9 @@
         .badge-in { background: rgba(16, 185, 129, 0.12); color: var(--mint); }
         .badge-out { background: rgba(244, 63, 94, 0.12); color: var(--crimson); }
 
+        /* Style tambahan untuk penunjuk riwayat jam di tabel */
+        .time-stamp { font-size: 11px; color: var(--text-s); display: block; margin-top: 4px; font-family: monospace; }
+
         .btn-trash { color: var(--text-s); border: none; background: none; cursor: pointer; font-size: 14px; }
         .btn-trash:hover { color: var(--crimson); }
 
@@ -194,6 +202,10 @@
             <div class="title-block">
                 <h1>Corporate Ledger <span style="color: var(--electric-blue);">Intelligence</span></h1>
                 <div class="user-badge-profile" onclick="logoutUser()"><i class="fa-solid fa-user-check"></i> <span id="active-profile-name">Default</span> (Log Out)</div>
+                <div class="live-clock-wrapper">
+                    <i class="fa-regular fa-clock"></i>
+                    <span id="live-timestamp-string">Memuat Penunjuk Waktu Sektor...</span>
+                </div>
             </div>
             <button class="btn-action" id="cmd-pdf">
                 <i class="fa-solid fa-cloud-arrow-down"></i> EKSPOR LAPORAN (PDF)
@@ -279,7 +291,7 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Item Keterangan</th>
+                                <th>Item Keterangan / Riwayat</th>
                                 <th>Kategori</th>
                                 <th>Aliran</th>
                                 <th style="text-align: right;">Jumlah Neraca</th>
@@ -302,13 +314,23 @@
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
         };
 
+        // --- MANAJEMEN SISTEM REALTIME TIMESTAMP ENGINE ---
+        const startLiveClock = () => {
+            setInterval(() => {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dateStr = now.toLocaleDateString('id-ID', options);
+                const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                document.getElementById('live-timestamp-string').innerText = `${dateStr} | ${timeStr} WIB`;
+            }, 1000);
+        };
+
         // --- MANAJEMEN SISTEM AUTHENTIKASI & PRIVASI AKUN USER ---
         const toggleGatePanels = (isRegister) => {
             document.getElementById('login-box').style.display = isRegister ? 'none' : 'block';
             document.getElementById('register-box').style.display = isRegister ? 'block' : 'none';
         };
 
-        // Event: Registrasi Akun Baru
         document.getElementById('register-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const username = document.getElementById('reg-user').value.trim().toLowerCase();
@@ -321,7 +343,6 @@
                 return;
             }
             
-            // Simpan data kredensial
             userRegistry[username] = password;
             localStorage.setItem('sys_user_registry', JSON.stringify(userRegistry));
             
@@ -330,7 +351,6 @@
             toggleGatePanels(false);
         });
 
-        // Event: Proses Verifikasi Login Masuk
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const username = document.getElementById('login-user').value.trim().toLowerCase();
@@ -359,11 +379,12 @@
         const loadUserData = () => {
             database = JSON.parse(localStorage.getItem(currentSpaceKey));
             
-            // Template data awal yang langsung di-isolate per-user jika database miliknya masih kosong
             if (!database) {
+                // Memberikan riwayat timestamp awal bawaan pada data inisial pertama
+                const genesisTime = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
                 database = [
-                    { desc: 'Injeksi Dana Awal Akun', type: 'in', cat: 'Investasi', amount: 50000000 },
-                    { desc: 'Alokasi Pengeluaran Sistem', type: 'out', cat: 'Operasional', amount: 15000000 }
+                    { desc: 'Injeksi Dana Awal Akun', type: 'in', cat: 'Investasi', amount: 50000000, timestamp: genesisTime },
+                    { desc: 'Alokasi Pengeluaran Sistem', type: 'out', cat: 'Operasional', amount: 15000000, timestamp: genesisTime }
                 ];
             }
             syncWorkspace();
@@ -388,9 +409,13 @@
                 if (query && !item.desc.toLowerCase().includes(query)) return;
                 if (filterType !== 'all' && item.type !== filterType) return;
 
+                // Penayangan Jurnal Transaksi lengkap dengan Riwayat Waktu (Timestamp) cetak
                 const tr = `
                     <tr>
-                        <td><strong>${item.desc}</strong></td>
+                        <td>
+                            <strong>${item.desc}</strong>
+                            <span class="time-stamp"><i class="fa-regular fa-clock"></i> Tersinkron: ${item.timestamp || 'Bawaan Sistem'}</span>
+                        </td>
                         <td><span style="color:var(--text-s)">${item.cat}</span></td>
                         <td><span class="badge ${item.type === 'in' ? 'badge-in' : 'badge-out'}">${item.type === 'in' ? 'INCOME' : 'EXPENSE'}</span></td>
                         <td style="text-align: right; font-weight: 700; color: ${item.type === 'in' ? 'var(--mint)' : 'var(--crimson)'}">
@@ -464,11 +489,19 @@
 
         document.getElementById('ledger-form').addEventListener('submit', (e) => {
             e.preventDefault();
+            
+            // Otomatis merekam hari, tanggal, bulan, tahun, dan waktu jam saat tombol submit ditekan
+            const currentTimeStamp = new Date().toLocaleString('id-ID', { 
+                dateStyle: 'medium', 
+                timeStyle: 'short' 
+            });
+
             database.unshift({
                 desc: document.getElementById('form-desc').value,
                 type: document.getElementById('form-type').value,
                 cat: document.getElementById('form-cat').value,
-                amount: parseInt(document.getElementById('form-amt').value)
+                amount: parseInt(document.getElementById('form-amt').value),
+                timestamp: currentTimeStamp // Menyimpan data waktu ke riwayat item
             });
             e.target.reset();
             syncWorkspace();
@@ -505,6 +538,9 @@
                 btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> EKSPOR LAPORAN (PDF)';
             }).save();
         });
+
+        // Menjalankan jam penunjuk waktu realtime saat web dibuka
+        startLiveClock();
     </script>
 </body>
 </html>
