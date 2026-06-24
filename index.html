@@ -59,7 +59,6 @@
 
         .title-block h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
         
-        /* Tambahan Style untuk Jam & Hari Realtime */
         .live-clock-wrapper {
             font-size: 13px; color: var(--text-s); margin-top: 6px; display: flex; align-items: center; gap: 8px;
         }
@@ -144,7 +143,6 @@
         .badge-in { background: rgba(16, 185, 129, 0.12); color: var(--mint); }
         .badge-out { background: rgba(244, 63, 94, 0.12); color: var(--crimson); }
 
-        /* Style tambahan untuk penunjuk riwayat jam di tabel */
         .time-stamp { font-size: 11px; color: var(--text-s); display: block; margin-top: 4px; font-family: monospace; }
 
         .btn-trash { color: var(--text-s); border: none; background: none; cursor: pointer; font-size: 14px; }
@@ -184,6 +182,9 @@
             <p>Buat ruang enklave baru. Data Anda dilindungi dari jangkauan pengguna lain.</p>
             <form id="register-form">
                 <div class="input-item" style="text-align: left;">
+                    <input type="text" id="reg-company" class="ctrl" placeholder="Nama Perusahaan / Bisnis" required>
+                </div>
+                <div class="input-item" style="text-align: left;">
                     <input type="text" id="reg-user" class="ctrl" placeholder="Buat Username" required>
                 </div>
                 <div class="input-item" style="text-align: left;">
@@ -200,7 +201,7 @@
     <div class="wrapper" id="dashboard-view">
         <header class="dashboard-header">
             <div class="title-block">
-                <h1>Corporate Ledger <span style="color: var(--electric-blue);">Intelligence</span></h1>
+                <h1 id="ui-company-title">Corporate Ledger Suite</h1>
                 <div class="user-badge-profile" onclick="logoutUser()"><i class="fa-solid fa-user-check"></i> <span id="active-profile-name">Default</span> (Log Out)</div>
                 <div class="live-clock-wrapper">
                     <i class="fa-regular fa-clock"></i>
@@ -333,6 +334,7 @@
 
         document.getElementById('register-form').addEventListener('submit', (e) => {
             e.preventDefault();
+            const companyName = document.getElementById('reg-company').value.trim();
             const username = document.getElementById('reg-user').value.trim().toLowerCase();
             const password = document.getElementById('reg-pass').value;
             
@@ -343,10 +345,11 @@
                 return;
             }
             
-            userRegistry[username] = password;
+            // Simpan password dan nama perusahaan dalam satu object data user
+            userRegistry[username] = { password: password, company: companyName };
             localStorage.setItem('sys_user_registry', JSON.stringify(userRegistry));
             
-            alert('Akun berhasil dibuat! Silakan masuk ke ruang Anda.');
+            alert('Akun korporasi berhasil dibuat! Silakan masuk.');
             e.target.reset();
             toggleGatePanels(false);
         });
@@ -357,10 +360,17 @@
             const password = document.getElementById('login-pass').value;
             
             let userRegistry = JSON.parse(localStorage.getItem('sys_user_registry')) || {};
+            const userData = userRegistry[username];
             
-            if (userRegistry[username] && userRegistry[username] === password) {
+            // Cek kecocokan data (mendukung database lama bertipe string maupun object baru)
+            if (userData && (userData === password || userData.password === password)) {
                 currentSpaceKey = "sec_ledger_space_" + username;
+                
+                // Set nama profil dan nama perusahaan secara dinamis
                 document.getElementById('active-profile-name').innerText = username.toUpperCase();
+                const displayCompany = userData.company ? userData.company : "Corporate Ledger Suite";
+                document.getElementById('ui-company-title').innerText = displayCompany;
+                
                 document.getElementById('auth-gate').style.display = 'none';
                 loadUserData();
             } else {
@@ -380,7 +390,6 @@
             database = JSON.parse(localStorage.getItem(currentSpaceKey));
             
             if (!database) {
-                // Memberikan riwayat timestamp awal bawaan pada data inisial pertama
                 const genesisTime = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
                 database = [
                     { desc: 'Injeksi Dana Awal Akun', type: 'in', cat: 'Investasi', amount: 50000000, timestamp: genesisTime },
@@ -409,7 +418,6 @@
                 if (query && !item.desc.toLowerCase().includes(query)) return;
                 if (filterType !== 'all' && item.type !== filterType) return;
 
-                // Penayangan Jurnal Transaksi lengkap dengan Riwayat Waktu (Timestamp) cetak
                 const tr = `
                     <tr>
                         <td>
@@ -490,7 +498,6 @@
         document.getElementById('ledger-form').addEventListener('submit', (e) => {
             e.preventDefault();
             
-            // Otomatis merekam hari, tanggal, bulan, tahun, dan waktu jam saat tombol submit ditekan
             const currentTimeStamp = new Date().toLocaleString('id-ID', { 
                 dateStyle: 'medium', 
                 timeStyle: 'short' 
@@ -501,7 +508,7 @@
                 type: document.getElementById('form-type').value,
                 cat: document.getElementById('form-cat').value,
                 amount: parseInt(document.getElementById('form-amt').value),
-                timestamp: currentTimeStamp // Menyimpan data waktu ke riwayat item
+                timestamp: currentTimeStamp
             });
             e.target.reset();
             syncWorkspace();
@@ -539,7 +546,6 @@
             }).save();
         });
 
-        // Menjalankan jam penunjuk waktu realtime saat web dibuka
         startLiveClock();
     </script>
 </body>
