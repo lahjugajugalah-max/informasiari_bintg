@@ -11,6 +11,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <style>
         :root {
             --bg-main: #060814;
@@ -169,7 +172,7 @@
                 <div class="input-item" style="text-align: left;">
                     <input type="password" id="login-pass" class="ctrl" placeholder="Password" required>
                 </div>
-                <button type="submit" class="btn-submit">LOGIN SECARA AMAN</button>
+                <button type="submit" class="btn-submit" id="btn-login-action">LOGIN SECARA AMAN</button>
             </form>
             <div style="margin-top: 20px;">
                 <p style="margin: 0;">Belum memiliki ruang kas? <span class="gate-toggle-link" onclick="toggleGatePanels(true)">Daftar Akun</span></p>
@@ -190,7 +193,7 @@
                 <div class="input-item" style="text-align: left;">
                     <input type="password" id="reg-pass" class="ctrl" placeholder="Buat Password Keamanan" required>
                 </div>
-                <button type="submit" class="btn-submit" style="background: var(--mint);">DAFTARKAN RUANG</button>
+                <button type="submit" class="btn-submit" style="background: var(--mint);" id="btn-reg-action">DAFTARKAN RUANG</button>
             </form>
             <div style="margin-top: 20px;">
                 <p style="margin: 0;">Sudah punya akun? <span class="gate-toggle-link" onclick="toggleGatePanels(false)">Kembali Login</span></p>
@@ -307,7 +310,16 @@
     </div>
 
     <script>
+        // --- SINKRONISASI CLOUD DATABASE REALTIME GLOBAL (FIREBASE ECOSYSTEM) ---
+        const firebaseConfig = {
+            databaseURL: "https://klinik-ace97-default-rtdb.firebaseio.com/"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const cloudDB = firebase.database();
+
         let currentSpaceKey = "";
+        let usernameClean = "";
         let database = [];
         let pieEngine = null, barEngine = null;
 
@@ -332,71 +344,107 @@
             document.getElementById('register-box').style.display = isRegister ? 'block' : 'none';
         };
 
+        // Event: Registrasi Akun Baru ke Cloud Server
         document.getElementById('register-form').addEventListener('submit', (e) => {
             e.preventDefault();
+            const btnReg = document.getElementById('btn-reg-action');
             const companyName = document.getElementById('reg-company').value.trim();
-            const username = document.getElementById('reg-user').value.trim().toLowerCase();
+            const username = document.getElementById('reg-user').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
             const password = document.getElementById('reg-pass').value;
             
-            let userRegistry = JSON.parse(localStorage.getItem('sys_user_registry')) || {};
-            
-            if (userRegistry[username]) {
-                alert('Username ini sudah terdaftar oleh pengguna lain!');
+            if(!username){
+                alert("Username hanya boleh berisi huruf dan angka!");
                 return;
             }
-            
-            // Simpan password dan nama perusahaan dalam satu object data user
-            userRegistry[username] = { password: password, company: companyName };
-            localStorage.setItem('sys_user_registry', JSON.stringify(userRegistry));
-            
-            alert('Akun korporasi berhasil dibuat! Silakan masuk.');
-            e.target.reset();
-            toggleGatePanels(false);
+
+            btnReg.innerText = "Mendaftarkan ke Cloud...";
+            btnReg.disabled = true;
+
+            // Cek ketersediaan akun di Cloud Database
+            cloudDB.ref('users/' + username).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    alert('Username ini sudah terdaftar oleh pengguna lain di Cloud Server!');
+                    btnReg.innerText = "DAFTARKAN RUANG";
+                    btnReg.disabled = false;
+                } else {
+                    // Simpan data kredensial baru ke database cloud global
+                    cloudDB.ref('users/' + username).set({
+                        password: password,
+                        company: companyName
+                    }).then(() => {
+                        alert('Akun Korporasi Cloud berhasil dibuat! Silakan masuk.');
+                        e.target.reset();
+                        toggleGatePanels(false);
+                    }).finally(() => {
+                        btnReg.innerText = "DAFTARKAN RUANG";
+                        btnReg.disabled = false;
+                    });
+                }
+            });
         });
 
+        // Event: Proses Verifikasi Login Masuk via Cloud Server
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const username = document.getElementById('login-user').value.trim().toLowerCase();
+            const btnLogin = document.getElementById('btn-login-action');
+            const username = document.getElementById('login-user').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
             const password = document.getElementById('login-pass').value;
-            
-            let userRegistry = JSON.parse(localStorage.getItem('sys_user_registry')) || {};
-            const userData = userRegistry[username];
-            
-            // Cek kecocokan data (mendukung database lama bertipe string maupun object baru)
-            if (userData && (userData === password || userData.password === password)) {
-                currentSpaceKey = "sec_ledger_space_" + username;
+
+            btnLogin.innerText = "Menghubungkan ke Server...";
+            btnLogin.disabled = true;
+
+            cloudDB.ref('users/' + username).once('value').then((snapshot) => {
+                const userData = snapshot.val();
                 
-                // Set nama profil dan nama perusahaan secara dinamis
-                document.getElementById('active-profile-name').innerText = username.toUpperCase();
-                const displayCompany = userData.company ? userData.company : "Corporate Ledger Suite";
-                document.getElementById('ui-company-title').innerText = displayCompany;
-                
-                document.getElementById('auth-gate').style.display = 'none';
-                loadUserData();
-            } else {
-                alert('Otentikasi Gagal! Username atau password salah/tidak ditemukan.');
-            }
+                if (userData && (userData === password || userData.password === password)) {
+                    currentSpaceKey = "ledgers/" + username;
+                    usernameClean = username;
+                    
+                    document.getElementById('active-profile-name').innerText = username.toUpperCase();
+                    const displayCompany = userData.company ? userData.company : "Corporate Ledger Suite";
+                    document.getElementById('ui-company-title').innerText = displayCompany;
+                    
+                    document.getElementById('auth-gate').style.display = 'none';
+                    listenToCloudData();
+                } else {
+                    alert('Otentikasi Gagal! Kredensial server tidak cocok.');
+                }
+            }).catch((err) => {
+                alert("Gagal terhubung ke Server Jaringan.");
+            }).finally(() => {
+                btnLogin.innerText = "LOGIN SECARA AMAN";
+                btnLogin.disabled = false;
+            });
         });
 
         const logoutUser = () => {
+            if(currentSpaceKey){
+                cloudDB.ref(currentSpaceKey).off(); // Mematikan sinkronisasi real-time sebelum keluar
+            }
             currentSpaceKey = "";
+            usernameClean = "";
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
             document.getElementById('auth-gate').style.display = 'flex';
             toggleGatePanels(false);
         };
 
-        const loadUserData = () => {
-            database = JSON.parse(localStorage.getItem(currentSpaceKey));
-            
-            if (!database) {
-                const genesisTime = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-                database = [
-                    { desc: 'Injeksi Dana Awal Akun', type: 'in', cat: 'Investasi', amount: 50000000, timestamp: genesisTime },
-                    { desc: 'Alokasi Pengeluaran Sistem', type: 'out', cat: 'Operasional', amount: 15000000, timestamp: genesisTime }
-                ];
-            }
-            syncWorkspace();
+        // Mendengarkan perubahan data secara langsung (Live Sinkronisasi Multi-HP)
+        const listenToCloudData = () => {
+            cloudDB.ref(currentSpaceKey).on('value', (snapshot) => {
+                database = snapshot.val() || [];
+                
+                // Inisialisasi data default di Cloud jika akun benar-benar masih baru kosong
+                if (database.length === 0 && snapshot.val() !== "init_empty") {
+                    const genesisTime = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+                    database = [
+                        { desc: 'Injeksi Dana Awal Akun', type: 'in', cat: 'Investasi', amount: 50000000, timestamp: genesisTime },
+                        { desc: 'Alokasi Pengeluaran Sistem', type: 'out', cat: 'Operasional', amount: 15000000, timestamp: genesisTime }
+                    ];
+                    cloudDB.ref(currentSpaceKey).set(database);
+                }
+                syncWorkspace();
+            });
         };
 
         const syncWorkspace = () => {
@@ -444,10 +492,6 @@
             document.getElementById('ui-net').style.color = net >= 0 ? 'var(--electric-blue)' : 'var(--crimson)';
 
             renderCharts(totalIn, totalOut, categoryMap);
-            
-            if (currentSpaceKey) {
-                localStorage.setItem(currentSpaceKey, JSON.stringify(database));
-            }
         };
 
         const renderCharts = (inc, exp, catData) => {
@@ -510,14 +554,19 @@
                 amount: parseInt(document.getElementById('form-amt').value),
                 timestamp: currentTimeStamp
             });
+            
+            cloudDB.ref(currentSpaceKey).set(database);
             e.target.reset();
-            syncWorkspace();
         });
 
         const burnData = (idx) => {
             if (confirm('Hapus transaksi terpilih?')) {
                 database.splice(idx, 1);
-                syncWorkspace();
+                if(database.length === 0) {
+                    cloudDB.ref(currentSpaceKey).set("init_empty");
+                } else {
+                    cloudDB.ref(currentSpaceKey).set(database);
+                }
             }
         };
 
